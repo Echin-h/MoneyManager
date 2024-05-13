@@ -91,7 +91,6 @@ class LoginFrame extends JFrame implements ActionListener{
 
 //JOptionPane.showMessageDialog(null,"用户名密码出错", "警告", //JOptionPane.ERROR_MESSAGE);
 
-
 //主界面
 class MainFrame extends JFrame implements ActionListener{
     private JMenuBar mb=new JMenuBar();
@@ -175,7 +174,9 @@ class MainFrame extends JFrame implements ActionListener{
         p_detail.add(scrollpane);
         c.add(p_detail,"South");
 
-        //添加代码
+        // TODO: 添加代码
+        // 就是把数据从数据库中取出来然后填充到这个mainFrame中，可以保证每次打开这个界面都是最新的数据
+        // 具体的代码就直接看登录的sql细节，换成select而已
 
         if(bal1<0)
             l_bal.setText("个人总收支余额为"+bal1+"元。您已超支，请适度消费！");
@@ -189,17 +190,18 @@ class MainFrame extends JFrame implements ActionListener{
         this.show();
     }
 
+    // TODO: 一些主界面的操作，比如查询，修改密码，退出系统等等
     public void actionPerformed(ActionEvent e) {
         Object temp=e.getSource();
         if(temp==mI[0]){
-            new ModifyPwdFrame(username);
-        }else if(temp==mI[1]){
+            new ModifyPwdFrame(username);   // 这里看看要不要再加代码了，感觉要加，懒得看了
+        }else if(temp==mI[1]){    //  private JMenuItem mI[]={new JMenuItem("密码重置"),new JMenuItem("退出系统")}; ,一个是密码重置，一个是退出系统
             //添加代码
         }else if(temp==m_FMEdit){
             new BalEditFrame();
-        }else if(temp==b_select1){  //根据收支类型查询
+        }else if(temp==b_select1){  // 注意： private String s1[]={"收入","支出"};
             //添加代码
-        }else if(temp==b_select2){   //根据时间范围查询
+        }else if(temp==b_select2){   //根据时间范围查询   // t_formdate, t_todate, 从这两个地方入手，记得查询的时候两个值都要用，哪怕为空
             //添加代码
         }
     }
@@ -366,6 +368,22 @@ class BalEditFrame extends JFrame implements ActionListener{
         b_clear.addActionListener(this);
 
         //添加代码，为table添加鼠标点击事件监听addMouseListener
+        // 没测试过不知第对不对
+//        table.addMouseListener(new MouseAdapter(){
+//            public void mouseClicked(MouseEvent e){
+//                int row=table.getSelectedRow();
+//                t_id.setText(table.getValueAt(row,0).toString());
+//                t_date.setText(table.getValueAt(row,1).toString());
+//                c_type.setSelectedItem(table.getValueAt(row,2).toString());
+//                c_item.setSelectedItem(table.getValueAt(row,3).toString());
+//                t_bal.setText(table.getValueAt(row,4).toString());
+//
+//                int rowCount = table.getRowCount();
+//                if (row < rowCount-1) {
+//                    table.setRowSelectionInterval(row+1, row+1);
+//                }
+//            }
+//        });
 
         this.setResizable(false);
         this.setSize(800,300);
@@ -427,11 +445,20 @@ class DBUtil{
         }
     }
 
+    // 这里创建表的方式非常的死板，但是为了简单，就这样了
     public static void migrate() {
         // 创建一个user表
-        String sql = "create table if not exists user(id int primary key auto_increment, username varchar(20), password varchar(20))";
+        String sqlU = "create table if not exists user(id int primary key auto_increment, username varchar(20), password varchar(20))";
         try {
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate(sqlU);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // 创建一个balance表  (编号，日期，类型，内容，金额)
+        String sqlB = "create table if not exists balance(id int primary key auto_increment, date datetime, type varchar(20), item varchar(20), money double)";
+        try {
+            stmt.executeUpdate(sqlB);
         } catch (SQLException e) {
             e.printStackTrace();
         }
