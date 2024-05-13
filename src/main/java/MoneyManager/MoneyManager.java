@@ -7,6 +7,7 @@ import javax.swing.*;
 
 public class MoneyManager {
     public static void main(String[] args) {
+        DBUtil db = new DBUtil();
         LoginFrame lf=new LoginFrame();
         lf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
@@ -50,7 +51,6 @@ class LoginFrame extends JFrame implements ActionListener{
     }
     public void actionPerformed(ActionEvent e) {
         if(b_cancel==e.getSource()){
-            this.dispose();
             //添加退出代码
             DBUtil.closeConnection(DBUtil.conn,DBUtil.stmt,DBUtil.rs);  //  关闭数据库连接
             this.dispose();
@@ -89,10 +89,7 @@ class LoginFrame extends JFrame implements ActionListener{
     }
 }
 
-
-
 //JOptionPane.showMessageDialog(null,"用户名密码出错", "警告", //JOptionPane.ERROR_MESSAGE);
-
 
 //主界面
 class MainFrame extends JFrame implements ActionListener{
@@ -177,7 +174,9 @@ class MainFrame extends JFrame implements ActionListener{
         p_detail.add(scrollpane);
         c.add(p_detail,"South");
 
-        //添加代码
+        // TODO: 添加代码
+        // 就是把数据从数据库中取出来然后填充到这个mainFrame中，可以保证每次打开这个界面都是最新的数据
+        // 具体的代码就直接看登录的sql细节，换成select而已
 
         if(bal1<0)
             l_bal.setText("个人总收支余额为"+bal1+"元。您已超支，请适度消费！");
@@ -191,17 +190,18 @@ class MainFrame extends JFrame implements ActionListener{
         this.show();
     }
 
+    // TODO: 一些主界面的操作，比如查询，修改密码，退出系统等等
     public void actionPerformed(ActionEvent e) {
         Object temp=e.getSource();
         if(temp==mI[0]){
-            new ModifyPwdFrame(username);
-        }else if(temp==mI[1]){
+            new ModifyPwdFrame(username);   // 这里看看要不要再加代码了，感觉要加，懒得看了
+        }else if(temp==mI[1]){    //  private JMenuItem mI[]={new JMenuItem("密码重置"),new JMenuItem("退出系统")}; ,一个是密码重置，一个是退出系统
             //添加代码
         }else if(temp==m_FMEdit){
             new BalEditFrame();
-        }else if(temp==b_select1){  //根据收支类型查询
+        }else if(temp==b_select1){  // 注意： private String s1[]={"收入","支出"};
             //添加代码
-        }else if(temp==b_select2){   //根据时间范围查询
+        }else if(temp==b_select2){   //根据时间范围查询   // t_formdate, t_todate, 从这两个地方入手，记得查询的时候两个值都要用，哪怕为空
             //添加代码
         }
     }
@@ -245,9 +245,43 @@ class ModifyPwdFrame extends JFrame implements ActionListener{
 
     public void actionPerformed(ActionEvent e) {
         if(b_cancel==e.getSource()){
-            //添加代码
+            // 取消修改密码噢
+            JOptionPane.showMessageDialog(null,"密码修改取消！", "提示", JOptionPane.INFORMATION_MESSAGE);
+            this.dispose();
         }else if(b_ok==e.getSource()){  //修改密码
-            //添加代码
+            // 密码修改
+            String oldPwd = t_oldPWD.getText().trim();
+            String newPwd = t_newPWD.getText().trim();
+            String newPwdAgain = t_newPWDAgain.getText().trim();
+            if (newPwd.isEmpty()){
+                JOptionPane.showMessageDialog(null,"新密码不能为空！", "警告", JOptionPane.ERROR_MESSAGE);
+            }else if(newPwd.equals(oldPwd)){
+                JOptionPane.showMessageDialog(null,"新密码不能与旧密码相同！", "警告", JOptionPane.ERROR_MESSAGE);
+            }else if(!newPwd.equals(newPwdAgain)){
+                JOptionPane.showMessageDialog(null,"两次输入的新密码不一致！", "警告", JOptionPane.ERROR_MESSAGE);
+            }else {
+                String sql = "select * from user where username = ?";
+                try {
+                    PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                    pstmt.setString(1, username);
+                    ResultSet rs = pstmt.executeQuery();
+                    if (rs.next()){
+                        if (rs.getString("password").equals(oldPwd)){
+                            String sql1 = "update user set password = ? where username = ?";
+                            PreparedStatement pstmt1 = DBUtil.conn.prepareStatement(sql1);
+                            pstmt1.setString(1, newPwd);
+                            pstmt1.setString(2, username);
+                            pstmt1.executeUpdate();
+                            JOptionPane.showMessageDialog(null,"密码修改成功！", "提示", JOptionPane.INFORMATION_MESSAGE);
+                            this.dispose();
+                        }else {
+                            JOptionPane.showMessageDialog(null,"旧密码错误！", "警告", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 }
@@ -334,6 +368,22 @@ class BalEditFrame extends JFrame implements ActionListener{
         b_clear.addActionListener(this);
 
         //添加代码，为table添加鼠标点击事件监听addMouseListener
+        // 没测试过不知第对不对
+//        table.addMouseListener(new MouseAdapter(){
+//            public void mouseClicked(MouseEvent e){
+//                int row=table.getSelectedRow();
+//                t_id.setText(table.getValueAt(row,0).toString());
+//                t_date.setText(table.getValueAt(row,1).toString());
+//                c_type.setSelectedItem(table.getValueAt(row,2).toString());
+//                c_item.setSelectedItem(table.getValueAt(row,3).toString());
+//                t_bal.setText(table.getValueAt(row,4).toString());
+//
+//                int rowCount = table.getRowCount();
+//                if (row < rowCount-1) {
+//                    table.setRowSelectionInterval(row+1, row+1);
+//                }
+//            }
+//        });
 
         this.setResizable(false);
         this.setSize(800,300);
@@ -355,4 +405,71 @@ class BalEditFrame extends JFrame implements ActionListener{
         }
     }
 }
+
+class DBUtil{
+    public static Connection conn=null;
+    public static Statement stmt=null;
+    static ResultSet rs=null;
+    private static String driver="com.mysql.cj.jdbc.Driver";
+    private static String url="jdbc:mysql://localhost:3307/moneymanager?useSSL=false&serverTimezone=UTC";
+    private static String user="user";
+    private static String password="password";
+
+    public DBUtil(){
+        conn=getConnection();
+        try{
+            stmt=conn.createStatement();
+            migrate();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public static Connection getConnection(){
+        try{
+            Class.forName(driver);
+            conn=DriverManager.getConnection(url,user,password);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return conn;
+    }
+
+    public static void closeConnection(Connection conn,Statement stmt,ResultSet rs) {
+        try {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 这里创建表的方式非常的死板，但是为了简单，就这样了
+    public static void migrate() {
+        // 创建一个user表
+        String sqlU = "create table if not exists user(id int primary key auto_increment, username varchar(20), password varchar(20))";
+        try {
+            stmt.executeUpdate(sqlU);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // 创建一个balance表  (编号，日期，类型，内容，金额)
+        String sqlB = "create table if not exists balance(id int primary key auto_increment, date datetime, type varchar(20), item varchar(20), money double)";
+        try {
+            stmt.executeUpdate(sqlB);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class TestDBUtil{
+    public static void main(String[] args){
+        new DBUtil();
+        System.out.println("数据库连接成功！");
+    }
+}
+
  
