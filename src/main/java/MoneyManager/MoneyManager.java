@@ -7,6 +7,7 @@ import javax.swing.*;
 
 public class MoneyManager {
     public static void main(String[] args) {
+        DBUtil db = new DBUtil();
         LoginFrame lf=new LoginFrame();
         lf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
@@ -50,22 +51,43 @@ class LoginFrame extends JFrame implements ActionListener{
     }
     public void actionPerformed(ActionEvent e) {
         if(b_cancel==e.getSource()){
-            this.dispose();
             //添加退出代码
+            DBUtil.closeConnection(DBUtil.conn,DBUtil.stmt,DBUtil.rs);  //  关闭数据库连接
+            this.dispose();
         }else if(b_ok==e.getSource()){
             //添加代码，验证身份成功后显示主界面
             String name = t_user.getText().trim();
             String pwd = t_pwd.getText().trim();
-            if(name.equals("Tom")&pwd.equals("123")){
-
+            String sql = "select * from user where username = ?";
+            try {
+                PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                pstmt.setString(1, name);
+                ResultSet rs = pstmt.executeQuery();
+                if (!rs.next()){
+                    // 用户不存在，创建用户
+                    // 图形界面没有注册的功能，所以直接--如果用户名不存在就创建用户 哈哈哈哈哈
+                    String sql1 = "insert into user(username, password) values(?, ?)";
+                    PreparedStatement pstmt1 = DBUtil.conn.prepareStatement(sql1);
+                    pstmt1.setString(1, name);
+                    pstmt1.setString(2, pwd);
+                    pstmt1.executeUpdate();
+                    JOptionPane.showMessageDialog(null, "用户创建成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+                    new MainFrame(t_user.getText().trim());
+                } else {
+                    // 用户存在，验证密码
+                    if (rs.getString("password").equals(pwd)) {
+                        JOptionPane.showMessageDialog(null, "登录成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+                        new MainFrame(t_user.getText().trim());
+                    } else {
+                        JOptionPane.showMessageDialog(null, "用户名密码出错", "警告", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
-            new MainFrame(t_user.getText().trim());
-
         }
     }
 }
-
-
 
 //JOptionPane.showMessageDialog(null,"用户名密码出错", "警告", //JOptionPane.ERROR_MESSAGE);
 
@@ -331,4 +353,62 @@ class BalEditFrame extends JFrame implements ActionListener{
         }
     }
 }
+
+class DBUtil{
+    public static Connection conn=null;
+    public static Statement stmt=null;
+    static ResultSet rs=null;
+    private static String driver="com.mysql.cj.jdbc.Driver";
+    private static String url="jdbc:mysql://localhost:3307/moneymanager?useSSL=false&serverTimezone=UTC";
+    private static String user="user";
+    private static String password="password";
+
+    public DBUtil(){
+        conn=getConnection();
+        try{
+            stmt=conn.createStatement();
+            migrate();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public static Connection getConnection(){
+        try{
+            Class.forName(driver);
+            conn=DriverManager.getConnection(url,user,password);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return conn;
+    }
+
+    public static void closeConnection(Connection conn,Statement stmt,ResultSet rs) {
+        try {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void migrate() {
+        // 创建一个user表
+        String sql = "create table if not exists user(id int primary key auto_increment, username varchar(20), password varchar(20))";
+        try {
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class TestDBUtil{
+    public static void main(String[] args){
+        new DBUtil();
+        System.out.println("数据库连接成功！");
+    }
+}
+
  

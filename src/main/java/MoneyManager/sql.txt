@@ -1,0 +1,56 @@
+--sql server
+--创建数据库
+create database moneyManager
+go
+
+--使用moneyManager为当前数据库
+use moneyManager
+go
+
+--创建收支表
+create table IncomeAndSpending
+(
+id varchar(10) not null,		--编号
+rdate char(8) not null,         --记录日期
+rtype char(4) not null,		--记录类型：收入，支出
+ritem  char(4) not null,	--记录内容：购物,餐饮,居家,交通,娱乐,人情,工资,奖金,其他
+bal  int not null	        --金额
+)
+go
+
+--创建登录系统时的登录信息表
+create table loginInfo
+(
+uid varchar(15) not null,	--登录名
+upw varchar(15) not null	--密码
+)
+go
+
+--将用户名密码插入数据库
+insert into loginInfo values('hdu','123')
+
+--将一些收支记录插入数据库
+insert into IncomeAndSpending values('2015080101','20150801','收入','工资',5500)
+insert into IncomeAndSpending values('2015080102','20150801','支出','交通',100)
+insert into IncomeAndSpending values('2015080301','20150803','支出','娱乐',200)
+insert into IncomeAndSpending values('2015080401','20150804','支出','餐饮',55)
+
+
+--基本DML语句，供参考
+select upw from loginInfo where uid='hdu'  --查询用户hdu的密码
+
+select * from IncomeAndSpending    --查询所有的收支信息
+
+SELECT  sum(bal) FROM  IncomeAndSpending  where rtype ='收入';  --查询总收入
+
+SELECT  sum(bal) FROM  IncomeAndSpending  where rtype ='支出';  --查询总支出
+
+select * from IncomeAndSpending where rtype = '支出'   --查询所有支出明细信息
+
+select * from IncomeAndSpending where rdate between '20150801' and '20150901'  --查询2015年8月1日到2015年9月1日期间的所有收支信息
+
+update logininfo set upw = '321' where uid='hdu'   --将hdu用户的密码改为321
+
+update IncomeAndSpending set bal= 5000 where id= '2015080101'	--将编号为2015080101的收入金额改为5000
+
+delete from IncomeAndSpending where id= '2015080102'	--将编号为2015080102的收支信息删除
