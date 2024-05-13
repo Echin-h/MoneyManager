@@ -243,9 +243,43 @@ class ModifyPwdFrame extends JFrame implements ActionListener{
 
     public void actionPerformed(ActionEvent e) {
         if(b_cancel==e.getSource()){
-            //添加代码
+            // 取消修改密码噢
+            JOptionPane.showMessageDialog(null,"密码修改取消！", "提示", JOptionPane.INFORMATION_MESSAGE);
+            this.dispose();
         }else if(b_ok==e.getSource()){  //修改密码
-            //添加代码
+            // 密码修改
+            String oldPwd = t_oldPWD.getText().trim();
+            String newPwd = t_newPWD.getText().trim();
+            String newPwdAgain = t_newPWDAgain.getText().trim();
+            if (newPwd.isEmpty()){
+                JOptionPane.showMessageDialog(null,"新密码不能为空！", "警告", JOptionPane.ERROR_MESSAGE);
+            }else if(newPwd.equals(oldPwd)){
+                JOptionPane.showMessageDialog(null,"新密码不能与旧密码相同！", "警告", JOptionPane.ERROR_MESSAGE);
+            }else if(!newPwd.equals(newPwdAgain)){
+                JOptionPane.showMessageDialog(null,"两次输入的新密码不一致！", "警告", JOptionPane.ERROR_MESSAGE);
+            }else {
+                String sql = "select * from user where username = ?";
+                try {
+                    PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                    pstmt.setString(1, username);
+                    ResultSet rs = pstmt.executeQuery();
+                    if (rs.next()){
+                        if (rs.getString("password").equals(oldPwd)){
+                            String sql1 = "update user set password = ? where username = ?";
+                            PreparedStatement pstmt1 = DBUtil.conn.prepareStatement(sql1);
+                            pstmt1.setString(1, newPwd);
+                            pstmt1.setString(2, username);
+                            pstmt1.executeUpdate();
+                            JOptionPane.showMessageDialog(null,"密码修改成功！", "提示", JOptionPane.INFORMATION_MESSAGE);
+                            this.dispose();
+                        }else {
+                            JOptionPane.showMessageDialog(null,"旧密码错误！", "警告", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 }
