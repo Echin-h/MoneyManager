@@ -1,4 +1,4 @@
-package hello;
+package MoneyManager;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -39,7 +39,7 @@ class LoginFrame extends JFrame implements ActionListener{
         //为按钮添加监听事件
         b_ok.addActionListener(this);
         b_cancel.addActionListener(this);
-        //界面大小不可调整
+        //界面大小不可调整 
         this.setResizable(false);
         this.setSize(455,150);
 
@@ -50,10 +50,15 @@ class LoginFrame extends JFrame implements ActionListener{
     }
     public void actionPerformed(ActionEvent e) {
         if(b_cancel==e.getSource()){
-
+            this.dispose();
             //添加退出代码
         }else if(b_ok==e.getSource()){
             //添加代码，验证身份成功后显示主界面
+            String name = t_user.getText().trim();
+            String pwd = t_pwd.getText().trim();
+            if(name.equals("Tom")&pwd.equals("123")){
+
+            }
             new MainFrame(t_user.getText().trim());
 
         }
@@ -149,9 +154,6 @@ class MainFrame extends JFrame implements ActionListener{
         c.add(p_detail,"South");
 
         //添加代码
-        //查询个人总收支余额
-        // 快写出代码
-        
 
         if(bal1<0)
             l_bal.setText("个人总收支余额为"+bal1+"元。您已超支，请适度消费！");
@@ -329,57 +331,4 @@ class BalEditFrame extends JFrame implements ActionListener{
         }
     }
 }
-
-//数据库操作类
-class DBUtil{
-    private static Connection conn=null;
-    private static Statement stmt=null;
-    private static ResultSet rs=null;
-    private static String driver="com.mysql.jdbc.Driver";
-    private static String url="jdbc:mysql://localhost:3306/moneymanager";
-    private static String user="root";
-    private static String password="123456";
-
-    public static Connection getConnection(){
-        try{
-            Class.forName(driver);
-            conn=DriverManager.getConnection(url,user,password);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return conn;
-    }
-
-    public static ResultSet executeQuery(String sql){
-        try{
-            conn=getConnection();
-            stmt=conn.createStatement();
-            rs=stmt.executeQuery(sql);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return rs;
-    }
-
-    public static int executeUpdate(String sql){
-        int result=0;
-        try{
-            conn=getConnection();
-            stmt=conn.createStatement();
-            result=stmt.executeUpdate(sql);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    public static void close(){
-        try{
-            if(rs!=null) rs.close();
-            if(stmt!=null) stmt.close();
-            if(conn!=null) conn.close();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-}
+ 
