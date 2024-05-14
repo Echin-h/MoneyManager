@@ -287,7 +287,7 @@ class MainFrame extends JFrame implements ActionListener{
             //添加代码
             String fromdate = t_fromdate.getText().trim();
             String todate = t_todate.getText().trim();
-            String sql = "select * from balance where username = ? and date >= ? and date <= ?";
+            String sql = "SELECT * FROM balance WHERE username = ? AND date BETWEEN ? AND ?";
             try {
                 PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
                 pstmt.setString(1, this.username);
@@ -648,6 +648,7 @@ class DBUtil{
         }
 
         // 创建一个balance表  (编号，日期，类型，内容，金额)
+        // 有想过把时间的格式改成时间戳，然后每次用户记录账单的时候，直接用系统时间戳，这样就不用用户输入时间了，但是这个样子用户就会很局限于这个系统的时间，所以还是用用户输入时间吧
         String sqlB = "create table if not exists balance(id int primary key auto_increment, date datetime, type varchar(20), item varchar(20), money double,username varchar(20))";
         try {
             stmt.executeUpdate(sqlB);
