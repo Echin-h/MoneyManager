@@ -603,7 +603,7 @@ class DBUtil{
     public static Statement stmt=null;
     static ResultSet rs=null;
     private static String driver="com.mysql.cj.jdbc.Driver";
-    private static String url="jdbc:mysql://localhost:3307/moneymanager?useSSL=false&serverTimezone=UTC&characterEncoding=utf-8";
+    private static String url="jdbc:mysql://localhost:3307/moneymanager";
     private static String user="user";
     private static String password="password";
 
