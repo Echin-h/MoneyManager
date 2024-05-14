@@ -16,7 +16,7 @@ public class MoneyManager {
 //登录界面
 class LoginFrame extends JFrame implements ActionListener{
     private JLabel l_user,l_pwd; //用户名标签，密码标签
-    private JTextField t_user;//用户名文本框
+    private static JTextField t_user;//用户名文本框
     private JPasswordField t_pwd; //密码文本框
     private JButton b_ok,b_cancel; //登录按钮，退出按钮
 
@@ -73,11 +73,13 @@ class LoginFrame extends JFrame implements ActionListener{
                     pstmt1.executeUpdate();
                     JOptionPane.showMessageDialog(null, "用户创建成功", "提示", JOptionPane.INFORMATION_MESSAGE);
                     new MainFrame(t_user.getText().trim());
+                    this.dispose();
                 } else {
                     // 用户存在，验证密码
                     if (rs.getString("password").equals(pwd)) {
                         JOptionPane.showMessageDialog(null, "登录成功", "提示", JOptionPane.INFORMATION_MESSAGE);
                         new MainFrame(t_user.getText().trim());
+                        this.dispose();
                     } else {
                         JOptionPane.showMessageDialog(null, "用户名密码出错", "警告", JOptionPane.ERROR_MESSAGE);
                     }
@@ -87,9 +89,11 @@ class LoginFrame extends JFrame implements ActionListener{
             }
         }
     }
-}
+    public static String Getname(){
+        return t_user.getText().trim();
 
-//JOptionPane.showMessageDialog(null,"用户名密码出错", "警告", //JOptionPane.ERROR_MESSAGE);
+    }
+}
 
 //主界面
 class MainFrame extends JFrame implements ActionListener{
@@ -177,6 +181,42 @@ class MainFrame extends JFrame implements ActionListener{
         // TODO: 添加代码
         // 就是把数据从数据库中取出来然后填充到这个mainFrame中，可以保证每次打开这个界面都是最新的数据
         // 具体的代码就直接看登录的sql细节，换成select而已
+        // 代码如下：
+            String sql="select * from balance where username = ?";
+            try {
+                PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                pstmt.setString(1, this.username);
+                ResultSet rs = pstmt.executeQuery();
+                int i = 0;
+                while (rs.next()) {
+                    table.setValueAt(rs.getString("id"), i, 0);
+                    table.setValueAt(rs.getString("date"), i, 1);
+                    table.setValueAt(rs.getString("type"), i, 2);
+                    table.setValueAt(rs.getString("item"), i, 3);
+                    table.setValueAt(rs.getString("money"), i, 4);
+                    i++;
+                }
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        // 这里的table是一个JTable，可以直接用table.setValueAt()方法来填充数据
+        // 但是这里的table是一个二维数组，所以要用二维数组来存储数据，然后再填充到table中
+        // 然后再用table.setValueAt()方法来填充数据
+        // 这里的i是一个计数器，用来记录当前是第几行，从0开始
+        // 这里的rs是一个ResultSet，用来存储查询到的数据
+        // 这里的cloum是一个String数组，用来存储表头
+        // 这里的row是一个Object二维数组，用来存储表格数据
+        // 这里的table是一个JTable，用来显示表格
+        // 这里的table.setValueAt()方法是用来填充数据的
+        // 这里的rs.getString()方法是用来获取数据的
+        // 这里的i是一个计数器，用来记录当前是第几行，从0开始
+        // 这里的cloum是一个String数组，用来存储表头
+        // 这里的row是一个Object二维数组，用来存储表格数据
+        // 这里的table是一个JTable，用来显示表格
+        // 这里的table.setValueAt()方法是用来填充数据的
+        // 这里的rs.getString()方法是用来获取数据的
+
+
 
         if(bal1<0)
             l_bal.setText("个人总收支余额为"+bal1+"元。您已超支，请适度消费！");
@@ -191,18 +231,82 @@ class MainFrame extends JFrame implements ActionListener{
     }
 
     // TODO: 一些主界面的操作，比如查询，修改密码，退出系统等等
+
     public void actionPerformed(ActionEvent e) {
         Object temp=e.getSource();
         if(temp==mI[0]){
             new ModifyPwdFrame(username);   // 这里看看要不要再加代码了，感觉要加，懒得看了
         }else if(temp==mI[1]){    //  private JMenuItem mI[]={new JMenuItem("密码重置"),new JMenuItem("退出系统")}; ,一个是密码重置，一个是退出系统
-            //添加代码
+            DBUtil.closeConnection(DBUtil.conn,DBUtil.stmt,DBUtil.rs);  //  关闭数据库连接
+            this.dispose();
         }else if(temp==m_FMEdit){
             new BalEditFrame();
         }else if(temp==b_select1){  // 注意： private String s1[]={"收入","支出"};
-            //添加代码
+            if(c_type.getSelectedItem().equals("收入")){  //查询收入信息
+                //添加代码,使用sql语句查询收入信息，然后显示在table中
+                    String sql="select * from balance where username = ? and type = ?";
+                    try {
+                        PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                        pstmt.setString(1, this.username);
+                        pstmt.setString(2, "收入");
+                        ResultSet rs = pstmt.executeQuery();
+                        int i = 0;
+                        while (rs.next()) {
+                            table.setValueAt(rs.getString("id"), i, 0);
+                            table.setValueAt(rs.getString("date"), i, 1);
+                            table.setValueAt(rs.getString("type"), i, 2);
+                            table.setValueAt(rs.getString("item"), i, 3);
+                            table.setValueAt(rs.getString("money"), i, 4);
+                            i++;
+                        }
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    }
+            }else if(c_type.getSelectedItem().equals("支出")) {  //查询支出信息
+                //添加代码,使用sql语句查询支出信息，然后显示在table中
+                String sql="select * from balance where username = ? and type = ?";
+                try {
+                    PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                    pstmt.setString(1, this.username);
+                    pstmt.setString(2, "支出");
+                    ResultSet rs = pstmt.executeQuery();
+                    int i = 0;
+                    while (rs.next()) {
+                        table.setValueAt(rs.getString("id"), i, 0);
+                        table.setValueAt(rs.getString("date"), i, 1);
+                        table.setValueAt(rs.getString("type"), i, 2);
+                        table.setValueAt(rs.getString("item"), i, 3);
+                        table.setValueAt(rs.getString("money"), i, 4);
+                        i++;
+                    }
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }else if(temp==b_select2){   //根据时间范围查询   // t_formdate, t_todate, 从这两个地方入手，记得查询的时候两个值都要用，哪怕为空
             //添加代码
+            String fromdate = t_fromdate.getText().trim();
+            String todate = t_todate.getText().trim();
+            String sql = "select * from balance where username = ? and date >= ? and date <= ?";
+            try {
+                PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                pstmt.setString(1, this.username);
+                pstmt.setString(2, fromdate);
+                pstmt.setString(3, todate);
+                ResultSet rs = pstmt.executeQuery();
+                int i = 0;
+                while (rs.next()) {
+                    table.setValueAt(rs.getString("id"), i, 0);
+                    table.setValueAt(rs.getString("date"), i, 1);
+                    table.setValueAt(rs.getString("type"), i, 2);
+                    table.setValueAt(rs.getString("item"), i, 3);
+                    table.setValueAt(rs.getString("money"), i, 4);
+                    i++;
+                }
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+
         }
     }
 }
@@ -287,6 +391,7 @@ class ModifyPwdFrame extends JFrame implements ActionListener{
 }
 //收支编辑界面
 class BalEditFrame extends JFrame implements ActionListener{
+    private String username;
     private JLabel l_id,l_date,l_bal,l_type,l_item;
     private JTextField t_id,t_date,t_bal;
     private JComboBox c_type,c_item;
@@ -297,6 +402,7 @@ class BalEditFrame extends JFrame implements ActionListener{
 
     public BalEditFrame(){
         super("收支编辑" );
+        this.username = LoginFrame.Getname();
         l_id=new JLabel("编号：");
         l_date=new JLabel("日期：");
         l_bal=new JLabel("金额：");
@@ -391,17 +497,103 @@ class BalEditFrame extends JFrame implements ActionListener{
         this.setLocation((screen.width-this.getSize().width)/2,(screen.height-this.getSize().height)/2);
         this.show();
     }
+
+
+    public void refreshTable() {
+        String sql1="select * from balance where username = ?";
+        try {
+            PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql1);
+            pstmt.setString(1, this.username);
+            ResultSet rs = pstmt.executeQuery();
+            int i = 0;
+            while (rs.next()) {
+                table.setValueAt(rs.getString("id"), i, 0);
+                table.setValueAt(rs.getString("date"), i, 1);
+                table.setValueAt(rs.getString("type"), i, 2);
+                table.setValueAt(rs.getString("item"), i, 3);
+                table.setValueAt(rs.getString("money"), i, 4);
+                i++;
+            }
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+    }
+
     public void actionPerformed(ActionEvent e) {
         if(b_select==e.getSource()){  //查询所有收支信息
             //添加代码
+            refreshTable();
         }else if(b_update==e.getSource()){  // 修改某条收支信息
-            //添加代码
+            //添加代码，修改鼠标选中的行
+            int row = table.getSelectedRow();
+            String id = t_id.getText().trim();
+            String date = t_date.getText().trim();
+            String type = c_type.getSelectedItem().toString();
+            String item = c_item.getSelectedItem().toString();
+            String money = t_bal.getText().trim();
+            String sql = "update balance set date = ?, type = ?, item = ?, money = ? where id = ?";
+            try {
+                PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                pstmt.setString(1, date);
+                pstmt.setString(2, type);
+                pstmt.setString(3, item);
+                pstmt.setString(4, money);
+                pstmt.setString(5, id);
+                pstmt.executeUpdate();
+                JOptionPane.showMessageDialog(null, "修改成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }finally {
+                //刷新页面,和查询同理
+                refreshTable();
+
+            }
+
         }else if(b_delete==e.getSource()){   //删除某条收支信息
-            //添加代码
+            //添加代码,删除鼠标选中的行
+            int row = table.getSelectedRow();
+            String id = table.getValueAt(row, 0).toString();
+            String sql = "delete from balance where id = ?";
+            try {
+                PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                pstmt.setString(1, id);
+                pstmt.executeUpdate();
+                JOptionPane.showMessageDialog(null, "删除成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }finally {
+                //刷新页面,和查询同理
+                refreshTable();
+            }
         }else if(b_new==e.getSource()){   //新增某条收支信息
             //添加代码
+            String id = t_id.getText().trim();
+            String date = t_date.getText().trim();
+            String type = c_type.getSelectedItem().toString();
+            String item = c_item.getSelectedItem().toString();
+            String money = t_bal.getText().trim();
+            String sql = "insert into balance(id, date, type, item, money,username) values(?, ?, ?, ?, ?,?)";
+            try {
+                PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                pstmt.setString(1, id);
+                pstmt.setString(2, date);
+                pstmt.setString(3, type);
+                pstmt.setString(4, item);
+                pstmt.setString(5, money);
+                pstmt.setString(6, this.username);
+                pstmt.executeUpdate();
+                JOptionPane.showMessageDialog(null, "新增成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }finally {
+                //刷新页面,和查询同理
+                refreshTable();
+            }
         }else if(b_clear==e.getSource()){   //清空输入框
             //添加代码
+            t_id.setText("");
+            t_date.setText("");
+            t_bal.setText("");
         }
     }
 }
@@ -411,7 +603,7 @@ class DBUtil{
     public static Statement stmt=null;
     static ResultSet rs=null;
     private static String driver="com.mysql.cj.jdbc.Driver";
-    private static String url="jdbc:mysql://localhost:3307/moneymanager?useSSL=false&serverTimezone=UTC";
+    private static String url="jdbc:mysql://localhost:3307/moneymanager?useSSL=false&serverTimezone=UTC&characterEncoding=utf-8";
     private static String user="user";
     private static String password="password";
 
@@ -456,7 +648,7 @@ class DBUtil{
         }
 
         // 创建一个balance表  (编号，日期，类型，内容，金额)
-        String sqlB = "create table if not exists balance(id int primary key auto_increment, date datetime, type varchar(20), item varchar(20), money double)";
+        String sqlB = "create table if not exists balance(id int primary key auto_increment, date datetime, type varchar(20), item varchar(20), money double,username varchar(20))";
         try {
             stmt.executeUpdate(sqlB);
         } catch (SQLException e) {
@@ -472,4 +664,20 @@ class TestDBUtil{
     }
 }
 
- 
+//刷新页面的代码
+// 代码如下：
+//class RefreshFrame extends JFrame {
+//    public RefreshFrame() {
+//        super("刷新页面");
+//        Container c = this.getContentPane();
+//        c.setLayout(new BorderLayout());
+//        c.add(new JLabel("刷新成功"), BorderLayout.CENTER);
+//        this.setResizable(false);
+//        this.setSize(200, 100);
+//        Dimension screen = this.getToolkit().getScreenSize();
+//        this.setLocation((screen.width - this.getSize().width) / 2, (screen.height - this.getSize().height) / 2);
+//        this.show();
+//    }
+//}
+
+//写了但是目前还没用过，不知道对不对
