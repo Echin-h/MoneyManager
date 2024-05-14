@@ -474,20 +474,26 @@ class BalEditFrame extends JFrame implements ActionListener{
         b_clear.addActionListener(this);
 
         //添加代码，为table添加鼠标点击事件监听addMouseListener
-        // 没测试过不知第对不对
-//        table.addMouseListener(new MouseAdapter(){
-//            public void mouseClicked(MouseEvent e){
-//                int row=table.getSelectedRow();
-//                t_id.setText(table.getValueAt(row,0).toString());
-//                t_date.setText(table.getValueAt(row,1).toString());
-//                c_type.setSelectedItem(table.getValueAt(row,2).toString());
-//                c_item.setSelectedItem(table.getValueAt(row,3).toString());
-//                t_bal.setText(table.getValueAt(row,4).toString());
+//        table.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseClicked(MouseEvent e) {
+//                int selectedRow = table.getSelectedRow();
+//                // 在这里添加您希望执行的操作，例如获取选定行的数据或执行其他操作
+//                // 例如，您可以获取选定行的数据并填充到编辑框中
+//                String id = table.getValueAt(selectedRow, 0).toString();
+//                String date = table.getValueAt(selectedRow, 1).toString();
+//                String type = table.getValueAt(selectedRow, 2).toString();
+//                String item = table.getValueAt(selectedRow, 3).toString();
+//                String amount = table.getValueAt(selectedRow, 4).toString();
 //
-//                int rowCount = table.getRowCount();
-//                if (row < rowCount-1) {
-//                    table.setRowSelectionInterval(row+1, row+1);
-//                }
+//                // 然后将这些数据填充到相应的文本框和下拉框中
+//                t_id.setText(id);
+//                t_date.setText(date);
+//                // 填充类型下拉框
+//                c_type.setSelectedItem(type);
+//                // 填充内容下拉框
+//                c_item.setSelectedItem(item);
+//                t_bal.setText(amount);
 //            }
 //        });
 
@@ -500,6 +506,8 @@ class BalEditFrame extends JFrame implements ActionListener{
 
 
     public void refreshTable() {
+        // todo: 查询之前可以先清空表格
+
         String sql1="select * from balance where username = ?";
         try {
             PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql1);
@@ -551,6 +559,7 @@ class BalEditFrame extends JFrame implements ActionListener{
 
         }else if(b_delete==e.getSource()){   //删除某条收支信息
             //添加代码,删除鼠标选中的行
+            //TODO: 但是没有实现删除填写编号的功能，只能删除鼠标选中的行
             int row = table.getSelectedRow();
             String id = table.getValueAt(row, 0).toString();
             String sql = "delete from balance where id = ?";
