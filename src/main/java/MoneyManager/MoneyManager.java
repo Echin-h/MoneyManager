@@ -303,9 +303,20 @@ class MainFrame extends JFrame implements ActionListener{
                     table.setValueAt(rs.getString("money"), i, 4);
                     i++;
                 }
+                //如果没有日期范围内的数据就清空表格
+                //添加代码
+                // 代码如下：
+                if (i == 0) {
+                    for (int j = 0; j < 50; j++) {
+                        for (int k = 0; k < 5; k++) {
+                            table.setValueAt("", j, k);
+                        }
+                    }
+                }
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
+
 
         }
     }
