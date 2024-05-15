@@ -198,24 +198,6 @@ class MainFrame extends JFrame implements ActionListener{
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
-        // 这里的table是一个JTable，可以直接用table.setValueAt()方法来填充数据
-        // 但是这里的table是一个二维数组，所以要用二维数组来存储数据，然后再填充到table中
-        // 然后再用table.setValueAt()方法来填充数据
-        // 这里的i是一个计数器，用来记录当前是第几行，从0开始
-        // 这里的rs是一个ResultSet，用来存储查询到的数据
-        // 这里的cloum是一个String数组，用来存储表头
-        // 这里的row是一个Object二维数组，用来存储表格数据
-        // 这里的table是一个JTable，用来显示表格
-        // 这里的table.setValueAt()方法是用来填充数据的
-        // 这里的rs.getString()方法是用来获取数据的
-        // 这里的i是一个计数器，用来记录当前是第几行，从0开始
-        // 这里的cloum是一个String数组，用来存储表头
-        // 这里的row是一个Object二维数组，用来存储表格数据
-        // 这里的table是一个JTable，用来显示表格
-        // 这里的table.setValueAt()方法是用来填充数据的
-        // 这里的rs.getString()方法是用来获取数据的
-
-
 
         if(bal1<0)
             l_bal.setText("个人总收支余额为"+bal1+"元。您已超支，请适度消费！");
@@ -293,10 +275,6 @@ class MainFrame extends JFrame implements ActionListener{
                 }
             }
         }else if(temp==b_select2){   //根据时间范围查询   // t_formdate, t_todate, 从这两个地方入手，记得查询的时候两个值都要用，哪怕为空
-            //添加代码
-            //刷新页面
-            //添加代码
-            //刷新页面
             reflash();
             String sql;
             String fromdate = t_fromdate.getText().trim();
@@ -340,9 +318,6 @@ class MainFrame extends JFrame implements ActionListener{
                         table.setValueAt(rs.getString("money"), i, 4);
                         i++;
                     }
-                    //如果没有日期范围内的数据就显示所有数据
-
-
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -352,6 +327,7 @@ class MainFrame extends JFrame implements ActionListener{
         }
     }
 }
+
 //修改密码界面
 class ModifyPwdFrame extends JFrame implements ActionListener{
     private JLabel l_oldPWD,l_newPWD,l_newPWDAgain;
@@ -529,14 +505,10 @@ class BalEditFrame extends JFrame implements ActionListener{
 //                String item = table.getValueAt(selectedRow, 3).toString();
 //                String amount = table.getValueAt(selectedRow, 4).toString();
 //
-//                // 然后将这些数据填充到相应的文本框和下拉框中
-//                t_id.setText(id);
-//                t_date.setText(date);
-//                // 填充类型下拉框
-//                c_type.setSelectedItem(type);
-//                // 填充内容下拉框
-//                c_item.setSelectedItem(item);
-//                t_bal.setText(amount);
+//                String sql = "select * from balance where id = ?";
+//                if (id.isEmpty()){
+//                    String sql1 =
+//                }
 //            }
 //        });
 
@@ -736,21 +708,3 @@ class TestDBUtil{
         System.out.println("数据库连接成功！");
     }
 }
-
-//刷新页面的代码
-// 代码如下：
-//class RefreshFrame extends JFrame {
-//    public RefreshFrame() {
-//        super("刷新页面");
-//        Container c = this.getContentPane();
-//        c.setLayout(new BorderLayout());
-//        c.add(new JLabel("刷新成功"), BorderLayout.CENTER);
-//        this.setResizable(false);
-//        this.setSize(200, 100);
-//        Dimension screen = this.getToolkit().getScreenSize();
-//        this.setLocation((screen.width - this.getSize().width) / 2, (screen.height - this.getSize().height) / 2);
-//        this.show();
-//    }
-//}
-
-//写了但是目前还没用过，不知道对不对
