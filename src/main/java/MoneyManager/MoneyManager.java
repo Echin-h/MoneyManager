@@ -324,7 +324,7 @@ class MainFrame extends JFrame implements ActionListener{
                 }
 
             }else {
-                sql = "SELECT * FROM balance WHERE username = ? AND date BETWEEN ? AND ?";
+                sql = "SELECT * FROM balance WHERE username = ? AND date BETWEEN ? AND ? ";
                 try {
                     PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
                     pstmt.setString(1, this.username);
