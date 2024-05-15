@@ -232,6 +232,14 @@ class MainFrame extends JFrame implements ActionListener{
 
     // TODO: 一些主界面的操作，比如查询，修改密码，退出系统等等
 
+    public void reflash(){
+        //把所有的数据都清空
+        for(int i=0;i<50;i++){
+            for(int j=0;j<5;j++){
+                table.setValueAt("", i, j);
+            }
+        }
+    }
     public void actionPerformed(ActionEvent e) {
         Object temp=e.getSource();
         if(temp==mI[0]){
@@ -243,6 +251,8 @@ class MainFrame extends JFrame implements ActionListener{
             new BalEditFrame();
         }else if(temp==b_select1){  // 注意： private String s1[]={"收入","支出"};
             if(c_type.getSelectedItem().equals("收入")){  //查询收入信息
+                    //刷新页面
+                    reflash();
                 //添加代码,使用sql语句查询收入信息，然后显示在table中
                     String sql="select * from balance where username = ? and type = ?";
                     try {
@@ -263,6 +273,8 @@ class MainFrame extends JFrame implements ActionListener{
                         e1.printStackTrace();
                     }
             }else if(c_type.getSelectedItem().equals("支出")) {  //查询支出信息
+                //刷新页面
+                reflash();
                 //添加代码,使用sql语句查询支出信息，然后显示在table中
                 String sql="select * from balance where username = ? and type = ?";
                 try {
@@ -285,6 +297,8 @@ class MainFrame extends JFrame implements ActionListener{
             }
         }else if(temp==b_select2){   //根据时间范围查询   // t_formdate, t_todate, 从这两个地方入手，记得查询的时候两个值都要用，哪怕为空
             //添加代码
+            //刷新页面
+            reflash();
             String fromdate = t_fromdate.getText().trim();
             String todate = t_todate.getText().trim();
             String sql = "SELECT * FROM balance WHERE username = ? AND date BETWEEN ? AND ?";
@@ -303,9 +317,20 @@ class MainFrame extends JFrame implements ActionListener{
                     table.setValueAt(rs.getString("money"), i, 4);
                     i++;
                 }
+                //如果没有日期范围内的数据就清空表格
+                //添加代码
+                // 代码如下：
+                if (i == 0) {
+                    for (int j = 0; j < 50; j++) {
+                        for (int k = 0; k < 5; k++) {
+                            table.setValueAt("", j, k);
+                        }
+                    }
+                }
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
+
 
         }
     }
@@ -506,8 +531,12 @@ class BalEditFrame extends JFrame implements ActionListener{
 
 
     public void refreshTable() {
-        // todo: 查询之前可以先清空表格
-
+        //清空表格
+        for (int i = 0; i < 50; i++) {
+            for (int j = 0; j < 5; j++) {
+                table.setValueAt("", i, j);
+            }
+        }
         String sql1="select * from balance where username = ?";
         try {
             PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql1);
