@@ -135,7 +135,7 @@ class MainFrame extends JFrame implements ActionListener{
         l_todate=new JLabel("终止时间");
         t_todate=new JTextField(8);
         b_select2=new JButton("查询");
-        l_ps = new JLabel("注意：时间格式为YYYYMMDD，例如：20150901");
+        l_ps = new JLabel("注意：时间格式为YYYY-MM-DD HH:mm:ss，例如：2015-09-01 13:24:00");
         p_condition=new JPanel();
         p_condition.setLayout(new GridLayout(3,1));
         p_condition.setBorder(BorderFactory.createCompoundBorder(
@@ -178,7 +178,6 @@ class MainFrame extends JFrame implements ActionListener{
         p_detail.add(scrollpane);
         c.add(p_detail,"South");
 
-        // TODO: 添加代码
         // 就是把数据从数据库中取出来然后填充到这个mainFrame中，可以保证每次打开这个界面都是最新的数据
         // 具体的代码就直接看登录的sql细节，换成select而已
         // 代码如下：
@@ -229,8 +228,6 @@ class MainFrame extends JFrame implements ActionListener{
         this.setLocation((screen.width-this.getSize().width)/2,(screen.height-this.getSize().height)/2);
         this.show();
     }
-
-    // TODO: 一些主界面的操作，比如查询，修改密码，退出系统等等
 
     public void reflash(){
         //把所有的数据都清空
@@ -299,9 +296,15 @@ class MainFrame extends JFrame implements ActionListener{
             //添加代码
             //刷新页面
             reflash();
+            String sql;
             String fromdate = t_fromdate.getText().trim();
             String todate = t_todate.getText().trim();
-            String sql = "SELECT * FROM balance WHERE username = ? AND date BETWEEN ? AND ?";
+            if(fromdate.isEmpty()&&todate.isEmpty()){
+                sql = "SELECT * FROM balance ";
+            }else {
+                sql = "SELECT * FROM balance WHERE username = ? AND date BETWEEN ? AND ?";
+
+            }
             try {
                 PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
                 pstmt.setString(1, this.username);
@@ -317,16 +320,9 @@ class MainFrame extends JFrame implements ActionListener{
                     table.setValueAt(rs.getString("money"), i, 4);
                     i++;
                 }
-                //如果没有日期范围内的数据就清空表格
-                //添加代码
-                // 代码如下：
-                if (i == 0) {
-                    for (int j = 0; j < 50; j++) {
-                        for (int k = 0; k < 5; k++) {
-                            table.setValueAt("", j, k);
-                        }
-                    }
-                }
+                //如果没有日期范围内的数据就显示所有数据
+
+
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
@@ -414,6 +410,7 @@ class ModifyPwdFrame extends JFrame implements ActionListener{
         }
     }
 }
+
 //收支编辑界面
 class BalEditFrame extends JFrame implements ActionListener{
     private String username;
@@ -610,23 +607,38 @@ class BalEditFrame extends JFrame implements ActionListener{
             String type = c_type.getSelectedItem().toString();
             String item = c_item.getSelectedItem().toString();
             String money = t_bal.getText().trim();
-            String sql = "insert into balance(id, date, type, item, money,username) values(?, ?, ?, ?, ?,?)";
-            try {
-                PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
-                pstmt.setString(1, id);
-                pstmt.setString(2, date);
-                pstmt.setString(3, type);
-                pstmt.setString(4, item);
-                pstmt.setString(5, money);
-                pstmt.setString(6, this.username);
-                pstmt.executeUpdate();
-                JOptionPane.showMessageDialog(null, "新增成功", "提示", JOptionPane.INFORMATION_MESSAGE);
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-            }finally {
-                //刷新页面,和查询同理
-                refreshTable();
+            //如果id是空的话，自增
+            if (id.isEmpty()) {
+                String sql = "insert into balance( date, type, item, money,username) values( ?, ?, ?, ?,?)";
+                try {
+                    PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                    pstmt.setString(1, date);
+                    pstmt.setString(2, type);
+                    pstmt.setString(3, item);
+                    pstmt.setString(4, money);
+                    pstmt.setString(5, this.username);
+                    pstmt.executeUpdate();
+                    JOptionPane.showMessageDialog(null, "新增成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+                }catch (SQLException e2){
+                    e2.printStackTrace();
+                }
+            }else{
+                String sql = "insert into balance(id, date, type, item, money,username) values(?, ?, ?, ?, ?,?)";
+                try {
+                    PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                    pstmt.setString(1, id);
+                    pstmt.setString(2, date);
+                    pstmt.setString(3, type);
+                    pstmt.setString(4, item);
+                    pstmt.setString(5, money);
+                    pstmt.setString(6, this.username);
+                    pstmt.executeUpdate();
+                    JOptionPane.showMessageDialog(null, "新增成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
             }
+            refreshTable();
         }else if(b_clear==e.getSource()){   //清空输入框
             //添加代码
             t_id.setText("");
