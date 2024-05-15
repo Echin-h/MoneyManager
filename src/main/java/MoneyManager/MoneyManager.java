@@ -295,38 +295,59 @@ class MainFrame extends JFrame implements ActionListener{
         }else if(temp==b_select2){   //根据时间范围查询   // t_formdate, t_todate, 从这两个地方入手，记得查询的时候两个值都要用，哪怕为空
             //添加代码
             //刷新页面
+            //添加代码
+            //刷新页面
             reflash();
             String sql;
             String fromdate = t_fromdate.getText().trim();
             String todate = t_todate.getText().trim();
             if(fromdate.isEmpty()&&todate.isEmpty()){
-                sql = "SELECT * FROM balance ";
+                sql = "SELECT * FROM balance where username=?";
+                try {
+                    PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                    pstmt.setString(1, this.username);
+                    ResultSet rs = pstmt.executeQuery();
+                    int i = 0;
+                    while (rs.next()) {
+                        table.setValueAt(rs.getString("id"), i, 0);
+                        table.setValueAt(rs.getString("date"), i, 1);
+                        table.setValueAt(rs.getString("type"), i, 2);
+                        table.setValueAt(rs.getString("item"), i, 3);
+                        table.setValueAt(rs.getString("money"), i, 4);
+                        i++;
+                    }
+                    //如果没有日期范围内的数据就显示所有数据
+
+
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+
             }else {
                 sql = "SELECT * FROM balance WHERE username = ? AND date BETWEEN ? AND ?";
+                try {
+                    PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                    pstmt.setString(1, this.username);
+                    pstmt.setString(2, fromdate);
+                    pstmt.setString(3, todate);
+                    ResultSet rs = pstmt.executeQuery();
+                    int i = 0;
+                    while (rs.next()) {
+                        table.setValueAt(rs.getString("id"), i, 0);
+                        table.setValueAt(rs.getString("date"), i, 1);
+                        table.setValueAt(rs.getString("type"), i, 2);
+                        table.setValueAt(rs.getString("item"), i, 3);
+                        table.setValueAt(rs.getString("money"), i, 4);
+                        i++;
+                    }
+                    //如果没有日期范围内的数据就显示所有数据
 
-            }
-            try {
-                PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
-                pstmt.setString(1, this.username);
-                pstmt.setString(2, fromdate);
-                pstmt.setString(3, todate);
-                ResultSet rs = pstmt.executeQuery();
-                int i = 0;
-                while (rs.next()) {
-                    table.setValueAt(rs.getString("id"), i, 0);
-                    table.setValueAt(rs.getString("date"), i, 1);
-                    table.setValueAt(rs.getString("type"), i, 2);
-                    table.setValueAt(rs.getString("item"), i, 3);
-                    table.setValueAt(rs.getString("money"), i, 4);
-                    i++;
+
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
                 }
-                //如果没有日期范围内的数据就显示所有数据
 
-
-            } catch (SQLException e1) {
-                e1.printStackTrace();
             }
-
 
         }
     }
