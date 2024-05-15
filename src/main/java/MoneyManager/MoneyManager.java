@@ -579,9 +579,10 @@ class BalEditFrame extends JFrame implements ActionListener{
             //添加代码
             refreshTable();
         }else if(b_update==e.getSource()){  // 修改某条收支信息
-            //添加代码，修改鼠标选中的行
+            // 根据某一行的编号，修改这一行的数据
+            // String id = t_id.getText().trim(); 这样子就可以根据编号修改了
             int row = table.getSelectedRow();
-            String id = t_id.getText().trim();
+            String id = table.getValueAt(row, 0).toString();
             String date = t_date.getText().trim();
             String type = c_type.getSelectedItem().toString();
             String item = c_item.getSelectedItem().toString();
@@ -606,7 +607,7 @@ class BalEditFrame extends JFrame implements ActionListener{
 
         }else if(b_delete==e.getSource()){   //删除某条收支信息
             //添加代码,删除鼠标选中的行
-            //TODO: 但是没有实现删除填写编号的功能，只能删除鼠标选中的行
+            // String id = t_id.getText().trim(); 这样子就可以根据编号删除了
             int row = table.getSelectedRow();
             String id = table.getValueAt(row, 0).toString();
             String sql = "delete from balance where id = ?";
