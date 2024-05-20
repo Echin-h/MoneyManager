@@ -628,6 +628,8 @@ class BalEditFrame extends JFrame implements ActionListener{
                     pstmt.setString(6, this.username);
                     pstmt.executeUpdate();
                     JOptionPane.showMessageDialog(null, "新增成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+                }catch (SQLIntegrityConstraintViolationException e1) {
+                    JOptionPane.showMessageDialog(null, "新增失败，ID已存在", "错误", JOptionPane.ERROR_MESSAGE);
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
