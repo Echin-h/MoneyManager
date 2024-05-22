@@ -70,6 +70,11 @@ class LoginFrame extends JFrame implements ActionListener{
                     PreparedStatement pstmt1 = DBUtil.conn.prepareStatement(sql1);
                     pstmt1.setString(1, name);
                     pstmt1.setString(2, pwd);
+                    //检验密码必须包含数字，字母，以及大于八位
+                    if (pwd.length() < 8 || !pwd.matches(".*[a-zA-Z].*") || !pwd.matches(".*[0-9].*")){
+                        JOptionPane.showMessageDialog(null, "密码必须包含数字，字母，以及大于八位", "警告", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                     pstmt1.executeUpdate();
                     JOptionPane.showMessageDialog(null, "用户创建成功", "提示", JOptionPane.INFORMATION_MESSAGE);
                     new MainFrame(t_user.getText().trim());
@@ -377,7 +382,9 @@ class ModifyPwdFrame extends JFrame implements ActionListener{
             String newPwdAgain = t_newPWDAgain.getText().trim();
             if (newPwd.isEmpty()){
                 JOptionPane.showMessageDialog(null,"新密码不能为空！", "警告", JOptionPane.ERROR_MESSAGE);
-            }else if(newPwd.equals(oldPwd)){
+            } else if (newPwd.length() < 8 || !newPwd.matches(".*[a-zA-Z].*") || !newPwd.matches(".*[0-9].*")){
+                JOptionPane.showMessageDialog(null, "密码必须包含数字，字母，以及大于八位", "警告", JOptionPane.ERROR_MESSAGE);
+            } else if(newPwd.equals(oldPwd)){
                 JOptionPane.showMessageDialog(null,"新密码不能与旧密码相同！", "警告", JOptionPane.ERROR_MESSAGE);
             }else if(!newPwd.equals(newPwdAgain)){
                 JOptionPane.showMessageDialog(null,"两次输入的新密码不一致！", "警告", JOptionPane.ERROR_MESSAGE);
@@ -492,7 +499,7 @@ class BalEditFrame extends JFrame implements ActionListener{
         b_new.addActionListener(this);
         b_clear.addActionListener(this);
 
-        //添加代码，为table添加鼠标点击事件监听addMouseListener
+//        添加代码，为table添加鼠标点击事件监听addMouseListener
 //        table.addMouseListener(new MouseAdapter() {
 //            @Override
 //            public void mouseClicked(MouseEvent e) {
