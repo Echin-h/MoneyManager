@@ -498,26 +498,17 @@ class BalEditFrame extends JFrame implements ActionListener{
         b_select.addActionListener(this);
         b_new.addActionListener(this);
         b_clear.addActionListener(this);
-
-//        添加代码，为table添加鼠标点击事件监听addMouseListener
-//        table.addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mouseClicked(MouseEvent e) {
-//                int selectedRow = table.getSelectedRow();
-//                // 在这里添加您希望执行的操作，例如获取选定行的数据或执行其他操作
-//                // 例如，您可以获取选定行的数据并填充到编辑框中
-//                String id = table.getValueAt(selectedRow, 0).toString();
-//                String date = table.getValueAt(selectedRow, 1).toString();
-//                String type = table.getValueAt(selectedRow, 2).toString();
-//                String item = table.getValueAt(selectedRow, 3).toString();
-//                String amount = table.getValueAt(selectedRow, 4).toString();
-//
-//                String sql = "select * from balance where id = ?";
-//                if (id.isEmpty()){
-//                    String sql1 =
-//                }
-//            }
-//        });
+        //键鼠事件
+        table.addMouseListener(new MouseAdapter(){
+            public void mouseClicked(MouseEvent e){
+                int row = table.getSelectedRow();
+                t_id.setText(table.getValueAt(row, 0).toString());
+                t_date.setText(table.getValueAt(row, 1).toString());
+                c_type.setSelectedItem(table.getValueAt(row, 2).toString());
+                c_item.setSelectedItem(table.getValueAt(row, 3).toString());
+                t_bal.setText(table.getValueAt(row, 4).toString());
+            }
+        });
 
         this.setResizable(false);
         this.setSize(800,300);
