@@ -375,7 +375,7 @@ class ModifyPwdFrame extends JFrame implements ActionListener{
             // 取消修改密码噢
             JOptionPane.showMessageDialog(null,"密码修改取消！", "提示", JOptionPane.INFORMATION_MESSAGE);
             this.dispose();
-        }else if(b_ok==e.getSource()){  //修改密码
+        }else if(b_ok==e.getSource()){
             // 密码修改
             String oldPwd = t_oldPWD.getText().trim();
             String newPwd = t_newPWD.getText().trim();
@@ -546,7 +546,6 @@ class BalEditFrame extends JFrame implements ActionListener{
 
     public void actionPerformed(ActionEvent e) {
         if(b_select==e.getSource()){  //查询所有收支信息
-            //添加代码
             refreshTable();
         }else if(b_update==e.getSource()){  // 修改某条收支信息
             // 根据某一行的编号，修改这一行的数据
@@ -593,7 +592,6 @@ class BalEditFrame extends JFrame implements ActionListener{
                 refreshTable();
             }
         }else if(b_new==e.getSource()){   //新增某条收支信息
-            //添加代码
             String id = t_id.getText().trim();
             String date = t_date.getText().trim();
             String type = c_type.getSelectedItem().toString();
@@ -693,7 +691,7 @@ class DBUtil{
 
         // 创建一个balance表  (编号，日期，类型，内容，金额)
         // 有想过把时间的格式改成时间戳，然后每次用户记录账单的时候，直接用系统时间戳，这样就不用用户输入时间了，但是这个样子用户就会很局限于这个系统的时间，所以还是用用户输入时间吧
-        String sqlB = "create table if not exists balance(id int primary key auto_increment, date datetime, type varchar(20), item varchar(20), money double,username varchar(20))";
+        String sqlB = "create table if not exists balance(id int primary key auto_increment, date date, type varchar(20), item varchar(20), money double,username varchar(20))";
         try {
             stmt.executeUpdate(sqlB);
         } catch (SQLException e) {
