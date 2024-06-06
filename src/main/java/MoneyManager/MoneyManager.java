@@ -125,9 +125,6 @@ class MainFrame extends JFrame implements ActionListener{
     private JSpinner spinnerFromDate = new JSpinner();
     private JSpinner spinnerToDate = new JSpinner();
 
-//    private JSpinner spinnerFromDate = new JSpinner();
-//
-//    private JSpinner spinnerToDate = new JSpinner();
     public MainFrame(String username){
         super(username+",欢迎使用个人理财账本!");
         this.username=username;
@@ -161,25 +158,6 @@ class MainFrame extends JFrame implements ActionListener{
         JFrame frame = new JFrame("Date Spinner Example");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(200, 200);
-
-//        // 创建 SpinnerDateModel
-//        Date initialDate = new Date();
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.add(Calendar.YEAR, -100);
-//        Date earliestDate = calendar.getTime();
-//        calendar.add(Calendar.YEAR, 200);
-//        Date latestDate = calendar.getTime();
-//        SpinnerDateModel modelFromDate = new SpinnerDateModel(initialDate, earliestDate, latestDate, Calendar.YEAR);
-//        SpinnerDateModel modelToDate = new SpinnerDateModel(initialDate, earliestDate, latestDate, Calendar.YEAR);
-//
-//        // 创建 JSpinner 并设置 model
-//        JSpinner spinnerFromDate = new JSpinner(modelFromDate);
-//        JSpinner spinnerToDate = new JSpinner(modelToDate);
-//
-//        JSpinner.DateEditor editorFrom = new JSpinner.DateEditor(spinnerFromDate, "yyyy-MM-dd");
-//        JSpinner.DateEditor editorTo = new JSpinner.DateEditor(spinnerToDate, "yyyy-MM-dd");
-//        spinnerFromDate.setEditor(editorFrom);
-//        spinnerToDate.setEditor(editorTo);
 
         SpinnerDateModel modelFrom = new SpinnerDateModel();
         SpinnerDateModel modelTo = new SpinnerDateModel();
@@ -488,9 +466,24 @@ class BalEditFrame extends JFrame implements ActionListener{
     private JScrollPane scrollpane;
     private JTable table;
 
+    private JSpinner spinnerDate = new JSpinner();
+
+    private void setupDatePicker() {
+        // 创建 SpinnerDateModel 实例
+        SpinnerDateModel model = new SpinnerDateModel();
+        model.setValue(new Date()); // 设置当前日期为默认值
+
+        // 创建 JSpinner 实例并设置模型
+        spinnerDate = new JSpinner(model);
+
+        // 创建 JSpinner.DateEditor 实例并设置日期格式
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(spinnerDate, "yyyy-MM-dd");
+        spinnerDate.setEditor(editor);
+    }
     public BalEditFrame(){
         super("收支编辑" );
         this.username = LoginFrame.Getname();
+        setupDatePicker();
         l_id=new JLabel("编号：");
         l_date=new JLabel("日期：");
         l_bal=new JLabel("金额：");
@@ -542,7 +535,8 @@ class BalEditFrame extends JFrame implements ActionListener{
         p1.add(l_id);
         p1.add(t_id);
         p1.add(l_date);
-        p1.add(t_date);
+        p1.add(spinnerDate);
+//        p1.add(t_date);
         p1.add(l_type);
         p1.add(c_type);
         p1.add(l_item);
@@ -634,14 +628,19 @@ class BalEditFrame extends JFrame implements ActionListener{
             // String id = t_id.getText().trim(); 这样子就可以根据编号修改了
             int row = table.getSelectedRow();
             String id = table.getValueAt(row, 0).toString();
-            String date = t_date.getText().trim();
+//            String date = t_date.getText().trim();
+            Date date = (Date) spinnerDate.getValue();
+            if (date == null){
+                JOptionPane.showMessageDialog(null, "日期不能为空", "错误", JOptionPane.ERROR_MESSAGE);
+                return ;
+            }
             String type = c_type.getSelectedItem().toString();
             String item = c_item.getSelectedItem().toString();
             String money = t_bal.getText().trim();
             String sql = "update balance set date = ?, type = ?, item = ?, money = ? where id = ?";
             try {
                 PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
-                pstmt.setString(1, date);
+                pstmt.setString(1, String.valueOf(date));
                 pstmt.setString(2, type);
                 pstmt.setString(3, item);
                 pstmt.setString(4, money);
@@ -649,17 +648,20 @@ class BalEditFrame extends JFrame implements ActionListener{
                 pstmt.executeUpdate();
                 JOptionPane.showMessageDialog(null, "修改成功", "提示", JOptionPane.INFORMATION_MESSAGE);
             } catch (SQLException e1) {
+                JOptionPane.showMessageDialog(null, "请检查你的输入是否正确", "错误", JOptionPane.ERROR_MESSAGE);
                 e1.printStackTrace();
             }finally {
                 //刷新页面,和查询同理
                 refreshTable();
-
             }
 
         }else if(b_delete==e.getSource()){   //删除某条收支信息
-            //添加代码,删除鼠标选中的行
             // String id = t_id.getText().trim(); 这样子就可以根据编号删除了
             int row = table.getSelectedRow();
+            if (row == -1){
+                JOptionPane.showMessageDialog(null, "请选择要删除的行", "错误", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             String id = table.getValueAt(row, 0).toString();
             String sql = "delete from balance where id = ?";
             try {
@@ -675,7 +677,13 @@ class BalEditFrame extends JFrame implements ActionListener{
             }
         }else if(b_new==e.getSource()){   //新增某条收支信息
             String id = t_id.getText().trim();
-            String date = t_date.getText().trim();
+            Date date = (Date) spinnerDate.getValue();
+            if (date == null){
+                JOptionPane.showMessageDialog(null, "日期不能为空", "错误", JOptionPane.ERROR_MESSAGE);
+                return ;
+            }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String dateStr = sdf.format(date);
             String type = c_type.getSelectedItem().toString();
             String item = c_item.getSelectedItem().toString();
             String money = t_bal.getText().trim();
@@ -684,12 +692,12 @@ class BalEditFrame extends JFrame implements ActionListener{
                 String sql = "insert into balance( date, type, item, money,username) values( ?, ?, ?, ?,?)";
                 try {
                     PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
-                    pstmt.setString(1, date);
+                    pstmt.setString(1, dateStr);
                     pstmt.setString(2, type);
                     pstmt.setString(3, item);
                     pstmt.setString(4, money);
                     pstmt.setString(5, this.username);
-                    if (date.length() != 10 || Integer.parseInt(date.substring(0, 4)) < 1000 || Integer.parseInt(date.substring(0, 4)) > 9999 || Integer.parseInt(date.substring(5, 7)) < 1 || Integer.parseInt(date.substring(5, 7)) > 12 || Integer.parseInt(date.substring(8, 10)) < 1 || Integer.parseInt(date.substring(8, 10)) > 31){
+                    if (dateStr.length() != 10 || Integer.parseInt(dateStr.substring(0, 4)) < 1000 || Integer.parseInt(dateStr.substring(0, 4)) > 9999 || Integer.parseInt(dateStr.substring(5, 7)) < 1 || Integer.parseInt(dateStr.substring(5, 7)) > 12 || Integer.parseInt(dateStr.substring(8, 10)) < 1 || Integer.parseInt(dateStr.substring(8, 10)) > 31){
                         JOptionPane.showMessageDialog(null, "日期格式错误", "错误", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
@@ -706,7 +714,7 @@ class BalEditFrame extends JFrame implements ActionListener{
                 try {
                     PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
                     pstmt.setString(1, id);
-                    pstmt.setString(2, date);
+                    pstmt.setString(2, dateStr);
                     pstmt.setString(3, type);
                     pstmt.setString(4, item);
                     pstmt.setString(5, money);
