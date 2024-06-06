@@ -151,7 +151,7 @@ class MainFrame extends JFrame implements ActionListener{
         l_todate=new JLabel("终止时间");
         t_todate=new JTextField(8);
         b_select2=new JButton("查询");
-        l_ps = new JLabel("注意：时间格式为YYYY-MM-DD HH:mm:ss，例如：2015-09-01 13:24:00");
+        l_ps = new JLabel("注意：时间格式为YYYY-MM-DD，例如：2015-09-01 ");
         p_condition=new JPanel();
         p_condition.setLayout(new GridLayout(3,1));
         p_condition.setBorder(BorderFactory.createCompoundBorder(
@@ -503,6 +503,26 @@ class BalEditFrame extends JFrame implements ActionListener{
         String s2[]={"购物","餐饮","居家","交通","娱乐","人情","工资","奖金","其他"};
         c_type=new JComboBox(s1);
         c_item=new JComboBox(s2);
+        c_type.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    c_item.removeAllItems();
+                    if (c_type.getSelectedItem().equals("收入")) {
+                        c_item.addItem("工资");
+                        c_item.addItem("奖金");
+                        c_item.addItem("其他");
+                    } else if (c_type.getSelectedItem().equals("支出")) {
+                        c_item.addItem("购物");
+                        c_item.addItem("餐饮");
+                        c_item.addItem("居家");
+                        c_item.addItem("交通");
+                        c_item.addItem("娱乐");
+                        c_item.addItem("人情");
+                        c_item.addItem("其他");
+                    }
+                }
+            }
+        });
 
         b_select=new JButton("查询");
         b_update=new JButton("修改");
@@ -668,10 +688,17 @@ class BalEditFrame extends JFrame implements ActionListener{
                     pstmt.setString(3, item);
                     pstmt.setString(4, money);
                     pstmt.setString(5, this.username);
+                    if (date.length() != 10 || Integer.parseInt(date.substring(0, 4)) < 1000 || Integer.parseInt(date.substring(0, 4)) > 9999 || Integer.parseInt(date.substring(5, 7)) < 1 || Integer.parseInt(date.substring(5, 7)) > 12 || Integer.parseInt(date.substring(8, 10)) < 1 || Integer.parseInt(date.substring(8, 10)) > 31){
+                        JOptionPane.showMessageDialog(null, "日期格式错误", "错误", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
                     pstmt.executeUpdate();
                     JOptionPane.showMessageDialog(null, "新增成功", "提示", JOptionPane.INFORMATION_MESSAGE);
                 }catch (SQLException e2){
                     e2.printStackTrace();
+                    //弹窗提示
+                    JOptionPane.showMessageDialog(null, "请检查你的输入是否正确", "错误", JOptionPane.ERROR_MESSAGE);
                 }
             }else{
                 String sql = "insert into balance(id, date, type, item, money,username) values(?, ?, ?, ?, ?,?)";
