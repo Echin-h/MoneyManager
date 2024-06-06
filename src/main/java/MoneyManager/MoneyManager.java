@@ -359,6 +359,7 @@ class MainFrame extends JFrame implements ActionListener{
 
 
                 } catch (SQLException e1) {
+                    JOptionPane.showMessageDialog(null, "时间格式错误", "错误", JOptionPane.ERROR_MESSAGE);
                     e1.printStackTrace();
                 }
 
