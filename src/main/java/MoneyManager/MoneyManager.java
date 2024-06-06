@@ -2,8 +2,14 @@ package MoneyManager;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import javax.swing.*;
+import javax.swing.*;
+import java.util.Date;
+import java.util.Calendar;
 
 public class MoneyManager {
     public static void main(String[] args) {
@@ -116,7 +122,12 @@ class MainFrame extends JFrame implements ActionListener{
     private double bal1,bal2;
     private JTable table;
     private String username;
+    private JSpinner spinnerFromDate = new JSpinner();
+    private JSpinner spinnerToDate = new JSpinner();
 
+//    private JSpinner spinnerFromDate = new JSpinner();
+//
+//    private JSpinner spinnerToDate = new JSpinner();
     public MainFrame(String username){
         super(username+",欢迎使用个人理财账本!");
         this.username=username;
@@ -147,6 +158,44 @@ class MainFrame extends JFrame implements ActionListener{
                 BorderFactory.createTitledBorder("输入查询条件"),
                 BorderFactory.createEmptyBorder(5,5,5,5)));
 
+        JFrame frame = new JFrame("Date Spinner Example");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(200, 200);
+
+//        // 创建 SpinnerDateModel
+//        Date initialDate = new Date();
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.add(Calendar.YEAR, -100);
+//        Date earliestDate = calendar.getTime();
+//        calendar.add(Calendar.YEAR, 200);
+//        Date latestDate = calendar.getTime();
+//        SpinnerDateModel modelFromDate = new SpinnerDateModel(initialDate, earliestDate, latestDate, Calendar.YEAR);
+//        SpinnerDateModel modelToDate = new SpinnerDateModel(initialDate, earliestDate, latestDate, Calendar.YEAR);
+//
+//        // 创建 JSpinner 并设置 model
+//        JSpinner spinnerFromDate = new JSpinner(modelFromDate);
+//        JSpinner spinnerToDate = new JSpinner(modelToDate);
+//
+//        JSpinner.DateEditor editorFrom = new JSpinner.DateEditor(spinnerFromDate, "yyyy-MM-dd");
+//        JSpinner.DateEditor editorTo = new JSpinner.DateEditor(spinnerToDate, "yyyy-MM-dd");
+//        spinnerFromDate.setEditor(editorFrom);
+//        spinnerToDate.setEditor(editorTo);
+
+        SpinnerDateModel modelFrom = new SpinnerDateModel();
+        SpinnerDateModel modelTo = new SpinnerDateModel();
+        modelFrom.setValue(new Date()); // 设置当前日期为起始日期
+        modelTo.setValue(new Date());   // 设置当前日期为终止日期
+
+// 创建 JSpinner 实例并设置模型
+         spinnerFromDate = new JSpinner(modelFrom);
+         spinnerToDate = new JSpinner(modelTo);
+
+// 创建 JSpinner.DateEditor 实例并设置日期格式
+        JSpinner.DateEditor editorFrom = new JSpinner.DateEditor(spinnerFromDate, "yyyy-MM-dd");
+        JSpinner.DateEditor editorTo = new JSpinner.DateEditor(spinnerToDate, "yyyy-MM-dd");
+        spinnerFromDate.setEditor(editorFrom);
+        spinnerToDate.setEditor(editorTo);
+
         JPanel p1 = new JPanel();
         JPanel p2 = new JPanel();
         JPanel p3 = new JPanel();
@@ -154,9 +203,12 @@ class MainFrame extends JFrame implements ActionListener{
         p1.add(c_type);
         p1.add(b_select1);
         p2.add(l_fromdate);
-        p2.add(t_fromdate);
+        // 日历的添加
+        p2.add(l_fromdate);
+        p2.add(spinnerFromDate); // 添加起始日期选择器
         p2.add(l_todate);
-        p2.add(t_todate);
+        p2.add(spinnerToDate);
+//        p2.add(t_todate);
         p2.add(b_select2);
         p3.add(l_ps);
         p_condition.add(p1);
@@ -282,8 +334,12 @@ class MainFrame extends JFrame implements ActionListener{
         }else if(temp==b_select2){   //根据时间范围查询   // t_formdate, t_todate, 从这两个地方入手，记得查询的时候两个值都要用，哪怕为空
             reflash();
             String sql;
-            String fromdate = t_fromdate.getText().trim();
-            String todate = t_todate.getText().trim();
+            String fromdate = getFormattedDate(spinnerFromDate);
+            String todate = getFormattedDate(spinnerToDate);
+            if (fromdate.compareTo(todate) > 0){
+                JOptionPane.showMessageDialog(null, "起始时间不能大于终止时间", "警告", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             if(fromdate.isEmpty()&&todate.isEmpty()){
                 sql = "SELECT * FROM balance where username=?";
                 try {
@@ -330,6 +386,11 @@ class MainFrame extends JFrame implements ActionListener{
             }
 
         }
+    }
+    private String getFormattedDate(JSpinner spinner) {
+        Date date = (Date) spinner.getValue();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(date);
     }
 }
 
@@ -706,3 +767,4 @@ class TestDBUtil{
         System.out.println("数据库连接成功！");
     }
 }
+
