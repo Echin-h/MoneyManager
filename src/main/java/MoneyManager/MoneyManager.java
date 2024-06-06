@@ -340,7 +340,26 @@ class MainFrame extends JFrame implements ActionListener{
                     JOptionPane.showMessageDialog(null, "时间格式错误", "错误", JOptionPane.ERROR_MESSAGE);
                     e1.printStackTrace();
                 }
-
+            }else if(fromdate.compareTo(todate)==0){
+                // 显示所有的数据
+                sql = "SELECT * FROM balance WHERE username = ?";
+                try {
+                    PreparedStatement pstmt = DBUtil.conn.prepareStatement(sql);
+                    pstmt.setString(1, this.username);
+//                    pstmt.setString(2, fromdate);
+                    ResultSet rs = pstmt.executeQuery();
+                    int i = 0;
+                    while (rs.next()) {
+                        table.setValueAt(rs.getString("id"), i, 0);
+                        table.setValueAt(rs.getString("date"), i, 1);
+                        table.setValueAt(rs.getString("type"), i, 2);
+                        table.setValueAt(rs.getString("item"), i, 3);
+                        table.setValueAt(rs.getString("money"), i, 4);
+                        i++;
+                    }
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
             }else {
                 sql = "SELECT * FROM balance WHERE username = ? AND date BETWEEN ? AND ? ";
                 try {
